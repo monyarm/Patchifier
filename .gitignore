@@ -1,0 +1,4 @@
+.idea/*
+Patchifier/obj/*
+Patchifier/bin/*
+*.log

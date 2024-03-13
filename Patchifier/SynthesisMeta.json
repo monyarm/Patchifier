@@ -1,0 +1,8 @@
+{
+  "Nickname": "Patchifier",
+  "Visibility": "Visible",
+  "OneLineDescription": "Generate Skypatcher/INI patches.",
+  "LongDescription": "This patcher turns parts of the synthesis patch into SPID/FLM/Skypatcher/etc.. files, thus reducing the masters the Synthesis patcher will have.",
+  "PreferredAutoVersioning": "Default",
+  "RequiredMods": []
+}
