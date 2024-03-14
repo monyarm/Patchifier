@@ -129,11 +129,9 @@ namespace Patchifier
                 {
                     if (!mask.Configuration.Specific.Flags)
                     {
+                        var allowedFlags = NpcConfiguration.Flag.AutoCalcStats & NpcConfiguration.Flag.Essential & NpcConfiguration.Flag.Protected;
                         var flagDiff = npc.Configuration.Flags ^ npcPreSynth.Configuration.Flags;
-                        if ((flagDiff
-                        & NpcConfiguration.Flag.AutoCalcStats
-                        & NpcConfiguration.Flag.Essential
-                        & NpcConfiguration.Flag.Protected) != 0)
+                        if ((flagDiff & allowedFlags) != ~ allowedFlags )
                         {
                             continue;
                         }
