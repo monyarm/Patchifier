@@ -95,9 +95,12 @@ namespace Patchifier
                     mask.Packages!.Overall,
                     mask.Keywords!.Overall,
                     mask.Class,
-                    mask.Name,
                     mask.ShortName,
-                    mask.PlayerSkills!.Overall,
+                    mask.PlayerSkills!.Specific!.SkillOffsets!.Overall,
+                    mask.PlayerSkills!.Specific!.GearedUpWeapons,
+                    mask.PlayerSkills!.Specific!.FarAwayModelDistance,
+                    mask.PlayerSkills!.Specific!.Unused,
+                    mask.PlayerSkills!.Specific!.Unused2,
                     mask.HeadParts!.Overall,
                     mask.HairColor,
                     mask.CombatStyle,
@@ -127,34 +130,79 @@ namespace Patchifier
                 }
                 else
                 {
+                    bool processed = false;
+                    skyPatcherNpcs += $"\n;{npc.EditorID} \"{npc.Name}\" [{npc.FormKey.ModKey.Name}|{npc.FormKey.IDString()}]";
+                    if (!mask.PlayerSkills.Overall)
+                    {
+
+                        if (!mask.PlayerSkills!.Specific!.Stamina)
+                        {
+                            processed = true;
+                            skyPatcherNpcs += $"\nfilterByNpcs={npc.FormKey.ModKey.Name}|{npc.FormKey.IDString()}:changeStats=stamina={npc.PlayerSkills!.Stamina}";
+                        }
+                        if (!mask.PlayerSkills!.Specific!.Health)
+                        {
+                            processed = true;
+                            skyPatcherNpcs += $"\nfilterByNpcs={npc.FormKey.ModKey.Name}|{npc.FormKey.IDString()}:changeStats=health={npc.PlayerSkills!.Health}";
+                        }
+                        if (!mask.PlayerSkills!.Specific!.Magicka)
+                        {
+                            processed = true;
+                            skyPatcherNpcs += $"\nfilterByNpcs={npc.FormKey.ModKey.Name}|{npc.FormKey.IDString()}:changeStats=magicka={npc.PlayerSkills!.Magicka}";
+                        }
+                        if (!mask.PlayerSkills!.Specific!.SkillValues!.Overall)
+                        {
+                            npc.PlayerSkills!.SkillValues!.ForEach(x =>
+                            {
+                                if (npc.PlayerSkills!.SkillValues![x.Key] != npcPreSynth.PlayerSkills!.SkillValues![x.Key])
+                                {
+                                    processed = true;
+                                    skyPatcherNpcs += $"\nfilterByNpcs={npc.FormKey.ModKey.Name}|{npc.FormKey.IDString()}:changeSkills={x.Key}={x.Value}";
+                                }
+                            });
+                        }
+                    }
+                    if (!mask.Name)
+                    {
+                        processed = true;
+                        skyPatcherNpcs += $"\nfilterByNpcs={npc.FormKey.ModKey.Name}|{npc.FormKey.IDString()}:fullName={npc.Name}";
+                    }
                     if (!mask.Configuration.Specific.Flags)
                     {
                         var allowedFlags = NpcConfiguration.Flag.AutoCalcStats & NpcConfiguration.Flag.Essential & NpcConfiguration.Flag.Protected;
                         var flagDiff = npc.Configuration.Flags ^ npcPreSynth.Configuration.Flags;
-                        if ((flagDiff & allowedFlags) != ~ allowedFlags )
+                        if ((flagDiff & allowedFlags) != ~allowedFlags)
                         {
                             continue;
                         }
                         else
                         {
-                            skyPatcherNpcs += $"\n;{npc.EditorID} \"{npc.Name}\" [{npc.FormKey.ModKey.Name}|{npc.FormKey.IDString()}]";
                             if (flagDiff.HasFlag(NpcConfiguration.Flag.AutoCalcStats))
                             {
+                                processed = true;
                                 skyPatcherNpcs += $"\nfilterByNpcs={npc.FormKey.ModKey.Name}|{npc.FormKey.IDString()}:setAutoCalcStats={npc.Configuration.Flags.HasFlag(NpcConfiguration.Flag.AutoCalcStats)}";
                             }
                             if (flagDiff.HasFlag(NpcConfiguration.Flag.Essential))
                             {
+                                processed = true;
                                 skyPatcherNpcs += $"\nfilterByNpcs={npc.FormKey.ModKey.Name}|{npc.FormKey.IDString()}:setEssential={npc.Configuration.Flags.HasFlag(NpcConfiguration.Flag.AutoCalcStats)}";
                             }
                             if (flagDiff.HasFlag(NpcConfiguration.Flag.Protected))
                             {
+                                processed = true;
                                 skyPatcherNpcs += $"\nfilterByNpcs={npc.FormKey.ModKey.Name}|{npc.FormKey.IDString()}:setProtected={npc.Configuration.Flags.HasFlag(NpcConfiguration.Flag.AutoCalcStats)}";
                             }
-                            skyPatcherNpcs += $"\n";
 
-                            state.PatchMod.Npcs.Remove(npc);
+
                         }
                     }
+                    
+                    if (processed)
+                    {
+                        skyPatcherNpcs += $"\n";
+                        state.PatchMod.Npcs.Remove(npc);
+                    }
+
                 }
 
             }
